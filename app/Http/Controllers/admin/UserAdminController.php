@@ -6,25 +6,71 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\UserAdmin;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
 
 class UserAdminController extends Controller
 {
     public function showCreateUserPage()
     {
-        return view('admin.cadastrar');
+        if (Auth::check()) {
+            // Obtém o nome do usuário autenticado
+            $users = UserAdmin::all();
+            $username = Auth::user()->username;
+            $userInfo = Auth::user();
+
+            return view('admin.cadastrar', compact('users', 'username', 'userInfo'));
+        }
     }
 
     public function showUpatedUserPage($id)
     {
         $user = UserAdmin::find($id);
-        return view('admin.editar', compact('user'));
+        $username = Auth::user()->username;
+        return view('admin.editar', compact('user', 'username'));
     }
 
     public function listUsers()
     {
-        $users = UserAdmin::all(); // Consulta todos os registros da tabela user_admins
+        $users = UserAdmin::all();
+        $username = Auth::user()->username;
+        $userInfo = Auth::user();
 
-        return view('admin.painel', compact('users'));
+        return view('admin.painel', compact('users', 'username', 'userInfo'));
+    }
+
+    public function searchUsers(Request $request)
+    {
+        $search = $request->query('search');
+        $status = $request->query('status');
+        $de = $request->query('de');
+        $ate = $request->query('ate');
+
+        $username = Auth::user()->username;
+        $userInfo = Auth::user();
+
+        // Consulta no banco de dados com base nos filtros
+        $users = UserAdmin::where(function ($query) use ($search, $status, $de, $ate) {
+            if ($search) {
+                $query->where('username', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            }
+
+            if ($status) {
+                $query->where('status', $status);
+            }
+
+            if ($de) {
+                $query->whereDate('created_at', '>=', Carbon::createFromFormat('d/m/Y', $de)->format('Y-m-d'));
+            }
+
+            if ($ate) {
+                $query->whereDate('created_at', '<=', Carbon::createFromFormat('d/m/Y', $ate)->format('Y-m-d'));
+            }
+        })->get();
+
+        return view('admin.painel', ['users' => $users], compact('username', 'userInfo'));
     }
 
     public function createUserAdimin(Request $request)
@@ -46,7 +92,6 @@ class UserAdminController extends Controller
             'status' => 'active',
         ]);
 
-        //return response()->json(['message' => 'Cadastro realizado com sucesso']);
         return redirect('/painel/listar-usuarios')->with('success', 'Cadastro realizado com sucesso.');
     }
 
@@ -61,16 +106,12 @@ class UserAdminController extends Controller
             'password' => 'nullable|string|confirmed',
         ]);
 
-        //dd($request);
-
         $user = UserAdmin::find($id);
-
 
         $user->type = $request->type;
         $user->status = $request->status;
         $user->username = $request->username;
         $user->email = $request->email;
-
 
         if ($request->password) {
             $user->password = Hash::make($request->password);
@@ -83,15 +124,13 @@ class UserAdminController extends Controller
 
     public function deleteUserAdmin($id)
     {
-        // Recupere o usuário com base no ID
+
         $user = UserAdmin::find($id);
 
-        // Verifique se o usuário existe
         if (!$user) {
             return response()->json(['error' => 'Usuário não encontrado'], 404);
         }
 
-        // Exclua o usuário
         $user->delete();
 
         return redirect('/painel/listar-usuarios')->with('success', 'Cadastro realizado com sucesso.');

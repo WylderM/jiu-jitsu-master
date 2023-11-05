@@ -21,7 +21,7 @@
 
                 <div class="col dropdown d-flex align-items-center justify-content-end">
                     <div class="d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                        Bem vindo Admin!
+                        Bem vindo {{ $username }}!
 
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear-fill ms-2" viewBox="0 0 16 16">
                             <path fill="#6c757D" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.820.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c.698 1.283 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c.413-1.4 1.4-2.397 1.4-2.81l.1-.34a1.464 1.464 0 0 1-.872-2.105l.17-.31c-1.283-.698-2.686.705-1.987 1.987l.311-.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
@@ -30,9 +30,9 @@
 
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item text-end" href="#">
+                            <!-- <a class="dropdown-item text-end" href="#">
                                 <small>Alterar Senha</small>
-                            </a>
+                            </a> -->
                             <a class="dropdown-item text-end" href="{{ route('admin.logout') }}">
                                 <small>Sair</small>
                             </a>
@@ -57,11 +57,13 @@
 
                     <div class="collapse show" id="menu-usuario">
                         <div class="bg-dark d-flex flex-column rounded mx-4 p-2 row-gap-1">
+                            @if ($userInfo->type === 'admin')
                             <a href="{{ route('admin.cadastrar') }}" class="submenu-link link-light text-decoration-none rounded p-2">
                                 <small class="d-flex justify-content-between align-items-center">
-                                    Cadastrar
+                                    Cadastrar Usuário
                                 </small>
                             </a>
+                            @endif
                             <a href="{{ route('admin.painel') }}" class="submenu-link link-light text-decoration-none rounded p-2 active">
                                 <small class="d-flex justify-content-between align-items-center">
                                     Listagem
@@ -89,7 +91,7 @@
         <main class="col h-100 text-light p-4">
             <div class="d-flex justify-content-between mb-4">
                 <h1 class="h3">Usuários</h1>
-
+                @if ($userInfo->type === 'admin')
                 <div class="d-flex gap-2">
                     <a href="#" class="btn btn-light" title="PDF">
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
@@ -106,16 +108,17 @@
 
                     <a href="{{ route('admin.cadastrar') }}" class="btn btn-light">+ Cadastrar Usuário</a>
                 </div>
+                @endif
             </div>
 
             <div class="d-flex justify-content-between align-items-end mb-3">
-                <form action="" class="bg-custom rounded col-12 py-3 px-4">
+                <form action="{{ route('admin.painel.busca') }}" class="bg-custom rounded col-12 py-3 px-4" method="GET">
 
                     <div class="row align-items-end row-gap-4">
                         <div class="col-3 d-flex flex-wrap">
                             <label for="search" class="col-form-label">Buscar:</label>
                             <div class="col-12">
-                                <input type="text" class="form-control bg-dark text-light border-dark" id="search" placeholder="Ex: Admin">
+                                <input type="text" name="search" class="form-control bg-dark text-light border-dark" id="search" placeholder="Ex: Admin">
                             </div>
                         </div>
 
@@ -158,7 +161,9 @@
                         <tr>
                             <th scope="col" class="text-uppercase">Usuário</th>
                             <th scope="col" class="text-uppercase">E-mail</th>
+                            @if ($userInfo->type === 'admin')
                             <th scope="col" class="text-uppercase text-center">Ações</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -166,6 +171,7 @@
                         <tr>
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->email }}</td>
+                            @if ($userInfo->type === 'admin')
                             <td>
                                 <div class="d-flex justify-content-center">
                                     <button type="button" class="btn btn-light d-flex justify-content-center align-items-center rounded-circle p-2 mx-2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-user-id="{{ $user->id }}" data-user-name="{{ $user->username }}" data-user-status="{{ $user->status }}" data-user-email="{{ $user->email }}">
@@ -190,6 +196,7 @@
                                     </form>
                                 </div>
                             </td>
+                            @endif
                         </tr>
                         @endforeach
                     </tbody>

@@ -22,6 +22,10 @@ use App\Http\Controllers\site\CompetitionController;
 |
 */
 
+Route::get('/', function () {
+    return redirect()->route('admin.login');
+})->name('root');
+
 Route::prefix('painel')->group(function () {
     // Login routes
     Route::get('/', [AuthAdminController::class, 'showLoginPage'])->name('admin.login');
@@ -30,14 +34,17 @@ Route::prefix('painel')->group(function () {
     Route::get('/logout', [AuthAdminController::class, 'logout'])->name('admin.logout');
     Route::get('/recuperar-senha', [AuthAdminController::class, 'showRequestPasswordPage'])->name('admin.recuperar-senha');
     Route::post('/recuperar-senha', [AuthAdminController::class, 'requestPassword']);
+    Route::get('/password/reset', 'Auth\ResetPasswordController@showResetForm')->name('password.reset');
+    Route::group(['middleware' => ['auth', 'check.user.type']], function () {
+        Route::get('/cadastrar', [UserAdminController::class, 'showCreateUserPage'])->name('admin.cadastrar');
+        Route::post('/cadastrar', [UserAdminController::class, 'createUserAdimin']);
 
-    // User routes
-    Route::get('/cadastrar', [UserAdminController::class, 'showCreateUserPage'])->middleware('auth')->name('admin.cadastrar');
-    Route::post('/cadastrar', [UserAdminController::class, 'createUserAdimin'])->middleware('auth');
+        Route::get('/editar/{id}', [UserAdminController::class, 'showUpatedUserPage'])->name('admin.editar');
+        Route::put('/admin/atualizar/{id}', [UserAdminController::class, 'updateUserAdmin'])->name('admin.atualizar');
+        Route::delete('/deletar/{id}', [UserAdminController::class, 'deleteUserAdmin'])->name('admin.deletar');
+    });
+    Route::get('/listar-usuarios/busca', [UserAdminController::class, 'searchUsers'])->name('admin.painel.busca');
     Route::get('/listar-usuarios', [UserAdminController::class, 'listUsers'])->middleware('auth')->name('admin.painel');
-    Route::get('/editar/{id}', [UserAdminController::class, 'showUpatedUserPage'])->middleware('auth')->name('admin.editar');
-    Route::put('/admin/atualizar/{id}', [UserAdminController::class, 'updateUserAdmin'])->name('admin.atualizar');
-    Route::delete('/deletar/{id}', [UserAdminController::class, 'deleteUserAdmin'])->middleware('auth')->name('admin.deletar');
 });
 
 Route::prefix('osu-bjj')->group(function () {
