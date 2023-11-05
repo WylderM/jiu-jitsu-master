@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
+
+
+
+use App\Models\UserAdmin;
+
 class AuthAdminController extends Controller
 {
     public function showLoginPage()
@@ -15,14 +21,27 @@ class AuthAdminController extends Controller
 
     public function login(Request $request)
     {
-        $request->session()->regenerate();
-        $email = $request->input('email');
-        $senha = $request->input('senha');
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        $data = $request->json()->all();
+        $user = UserAdmin::where('email', $request->email)->first();
 
-        dd($data);
-        return response()->json(['message' => 'Login bem-sucedido']);
+        if ($user && $user->validateCredentials($request->only('password'))) {
+            // As credenciais são válidas, autentique o usuário
+            Auth::login($user); // Isso autenticará o usuário
+
+            return redirect('/painel/listar-usuarios');
+        } else {
+            return back()->withErrors(['email' => 'Credenciais inválidas'])->withInput();
+        }
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+        return redirect('/painel/login');
     }
 
     public function showRequestPasswordPage()

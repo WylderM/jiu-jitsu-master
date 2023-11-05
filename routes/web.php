@@ -23,19 +23,21 @@ use App\Http\Controllers\site\CompetitionController;
 */
 
 Route::prefix('painel')->group(function () {
-    //login routes
+    // Login routes
     Route::get('/', [AuthAdminController::class, 'showLoginPage'])->name('admin.login');
     Route::get('/login', [AuthAdminController::class, 'showLoginPage'])->name('admin.login');
     Route::post('/login', [AuthAdminController::class, 'login']);
+    Route::get('/logout', [AuthAdminController::class, 'logout'])->name('admin.logout');
     Route::get('/recuperar-senha', [AuthAdminController::class, 'showRequestPasswordPage'])->name('admin.recuperar-senha');
     Route::post('/recuperar-senha', [AuthAdminController::class, 'requestPassword']);
 
-    //User routes
-    Route::get('/cadastrar', [UserAdminController::class, 'showCreateUserPage'])->name('admin.cadastrar');
-    Route::get('/editar', [UserAdminController::class, 'showUpatedUserPage'])->name('admin.editar');
-
-    //Painel routes
-    Route::get('/admin', [AdminController::class, 'showPainelPage'])->name('admin.painel');
+    // User routes
+    Route::get('/cadastrar', [UserAdminController::class, 'showCreateUserPage'])->middleware('auth')->name('admin.cadastrar');
+    Route::post('/cadastrar', [UserAdminController::class, 'createUserAdimin'])->middleware('auth');
+    Route::get('/listar-usuarios', [UserAdminController::class, 'listUsers'])->middleware('auth')->name('admin.painel');
+    Route::get('/editar/{id}', [UserAdminController::class, 'showUpatedUserPage'])->middleware('auth')->name('admin.editar');
+    Route::put('/admin/atualizar/{id}', [UserAdminController::class, 'updateUserAdmin'])->name('admin.atualizar');
+    Route::delete('/deletar/{id}', [UserAdminController::class, 'deleteUserAdmin'])->middleware('auth')->name('admin.deletar');
 });
 
 Route::prefix('osu-bjj')->group(function () {

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KBRTEC ADMIN</title>
+    <title>KBRTEC ADMIN - Login</title>
 
     <link rel="icon" type="image/x-icon" href="{{ asset('admin/img/favicon.ico') }}">
 
@@ -21,21 +21,27 @@
                 </div>
 
                 <div class="col-6 d-flex align-items-center p-5">
-                    <form action="painel.html" class="form w-100">
+                    <form method="POST" action="{{ route('admin.login') }}" class="form w-100">
+                        @csrf <!-- Adiciona um token CSRF -->
+
                         <h2 class="h4 text-light mb-4">Painel Administrativo</h2>
 
                         <div class="row row-gap-3">
                             <div class="col-12 form-group text-light">
                                 <label for="email">E-mail:</label>
-                                <input type="email" class="form-control bg-dark border-dark text-light" id="email" placeholder="example@kbrtec.com.br">
-                                <!-- <small class="bg-danger rounded py-1 px-2 mt-1 d-block text-light">Erro</small> -->
+                                <input type="email" class="form-control bg-dark border-dark text-light @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="example@kbrtec.com.br">
+                                @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-12 form-group text-light">
                                 <label for="password">Senha:</label>
-                                <input type="password" class="form-control bg-dark border-dark text-light" id="password">
-                                <!-- <small class="bg-danger rounded py-1 px-2 mt-1 d-block text-light">Erro</small> -->
-                                <a href="recuperar-senha.html" class="link-light"><small>Esqueci minha senha</small></a>
+                                <input type="password" class="form-control bg-dark border-dark text-light @error('password') is-invalid @enderror" id="password" name="password">
+                                @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <a href="{{ route('admin.recuperar-senha') }}" class="link-light"><small>Esqueci minha senha</small></a>
                             </div>
 
                             <div class="col-12">
